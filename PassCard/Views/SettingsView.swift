@@ -667,7 +667,7 @@ struct ServerSettingsView: View {
                     }
                     
                     Button {
-                        serverURL = "https://passcard-server.onrender.com"
+                        serverURL = "https://passcard-1.onrender.com"
                         HapticManager.shared.lightImpact()
                     } label: {
                         Text("Use Render Server")

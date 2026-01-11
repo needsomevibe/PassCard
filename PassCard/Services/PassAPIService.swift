@@ -55,8 +55,8 @@ class PassAPIService: PassAPIServiceProtocol, ObservableObject {
         #if targetEnvironment(simulator)
         return UserDefaults.standard.string(forKey: "serverURL") ?? "http://localhost:3000"
         #else
-        // Render server URL (замените на ваш после деплоя)
-        return UserDefaults.standard.string(forKey: "serverURL") ?? "https://passcard-server.onrender.com"
+        // Render server URL
+        return UserDefaults.standard.string(forKey: "serverURL") ?? "https://passcard-1.onrender.com"
         #endif
     }
     

@@ -72,6 +72,43 @@ def log_request():
     print(f"[{datetime.now().isoformat()}] {request.method} {request.path}")
 
 
+@app.route('/', methods=['GET'])
+def index():
+    """Main page"""
+    return '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PassCard Server</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #1c1c1e; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+            .container { text-align: center; padding: 40px; }
+            h1 { font-size: 48px; margin-bottom: 16px; }
+            p { color: #8e8e93; font-size: 18px; }
+            .status { background: #30d158; color: white; padding: 8px 20px; border-radius: 20px; display: inline-block; margin-top: 20px; }
+            a { color: #0a84ff; text-decoration: none; }
+            .links { margin-top: 30px; }
+            .links a { margin: 0 15px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎫 PassCard</h1>
+            <p>Apple Wallet Pass Generator Server</p>
+            <div class="status">✓ Online</div>
+            <div class="links">
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/support">Support</a>
+                <a href="/health">API Health</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    '''
+
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check"""
@@ -86,13 +123,52 @@ def health():
 @app.route('/privacy-policy', methods=['GET'])
 def privacy_policy():
     """Privacy Policy page"""
-    return send_from_directory(TEMPLATES_DIR, 'privacy.html')
+    try:
+        return send_from_directory(TEMPLATES_DIR, 'privacy.html')
+    except:
+        # Fallback if file not found
+        return '''
+        <!DOCTYPE html>
+        <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Privacy Policy - PassCard</title>
+        <style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:40px 20px;line-height:1.6}h1{color:#1d1d1f}h2{margin-top:30px;color:#1d1d1f}p{color:#424245}.highlight{background:#f0f0f5;padding:20px;border-radius:12px;margin:20px 0}</style></head>
+        <body>
+        <h1>🎫 PassCard Privacy Policy</h1>
+        <p><em>Last updated: January 2026</em></p>
+        <div class="highlight"><strong>Summary:</strong> PassCard does not collect, store, or share any personal data. All your passes are stored in Apple Wallet on your device.</div>
+        <h2>Information We Do Not Collect</h2>
+        <p>PassCard does not collect: personal information, location data, device identifiers, usage analytics, or any content from your passes.</p>
+        <h2>How the App Works</h2>
+        <p>When you create a pass, the information is processed to generate an Apple Wallet pass. Generated passes are added to Apple Wallet and stored by Apple. We do not store your passes on any servers.</p>
+        <h2>Server Communication</h2>
+        <p>The app communicates with our server solely to generate signed Apple Wallet passes. This process is encrypted using HTTPS and does not store any personal data.</p>
+        <h2>Contact</h2>
+        <p>Questions? Email us at <a href="mailto:needsomevibe@gmail.com">needsomevibe@gmail.com</a></p>
+        </body></html>
+        '''
 
 
 @app.route('/support', methods=['GET'])
 def support():
     """Support page"""
-    return send_from_directory(TEMPLATES_DIR, 'support.html')
+    try:
+        return send_from_directory(TEMPLATES_DIR, 'support.html')
+    except:
+        # Fallback if file not found
+        return '''
+        <!DOCTYPE html>
+        <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Support - PassCard</title>
+        <style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:40px 20px;line-height:1.6}h1{color:#1d1d1f}h2{margin-top:30px}.contact{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:30px;border-radius:16px;text-align:center;margin:20px 0}.contact a{color:white;font-size:18px}.faq{background:#f5f5f7;padding:20px;border-radius:12px;margin:15px 0}h3{margin-bottom:8px}</style></head>
+        <body>
+        <h1>🎫 PassCard Support</h1>
+        <div class="contact"><h3>📧 Contact Us</h3><a href="mailto:needsomevibe@gmail.com">needsomevibe@gmail.com</a><p style="margin-top:10px;opacity:0.9">We typically respond within 24 hours</p></div>
+        <h2>FAQ</h2>
+        <div class="faq"><h3>How do I create a pass?</h3><p>Tap "+" on the main screen, fill in details, and tap "Add to Wallet".</p></div>
+        <div class="faq"><h3>Can I edit a pass?</h3><p>Yes! Tap any saved pass and then tap "Edit" to modify it.</p></div>
+        <div class="faq"><h3>Where are passes stored?</h3><p>Securely in Apple Wallet on your device. We don't store your data.</p></div>
+        <div class="faq"><h3>Server Error?</h3><p>Check your internet connection. If it persists, check Settings in the app.</p></div>
+        <p style="margin-top:40px;color:#86868b"><a href="/privacy">Privacy Policy</a></p>
+        </body></html>
+        '''
 
 
 @app.route('/api/passes/create', methods=['POST'])
