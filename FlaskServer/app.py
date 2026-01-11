@@ -142,7 +142,7 @@ def privacy_policy():
         <h2>Server Communication</h2>
         <p>The app communicates with our server solely to generate signed Apple Wallet passes. This process is encrypted using HTTPS and does not store any personal data.</p>
         <h2>Contact</h2>
-        <p>Questions? Email us at <a href="mailto:needsomevibe@gmail.com">needsomevibe@gmail.com</a></p>
+        <p>Questions? Email us at <a href="mailto:miorauz@gmail.com">miorauz@gmail.com</a></p>
         </body></html>
         '''
 
@@ -160,7 +160,7 @@ def support():
         <style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:40px 20px;line-height:1.6}h1{color:#1d1d1f}h2{margin-top:30px}.contact{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:30px;border-radius:16px;text-align:center;margin:20px 0}.contact a{color:white;font-size:18px}.faq{background:#f5f5f7;padding:20px;border-radius:12px;margin:15px 0}h3{margin-bottom:8px}</style></head>
         <body>
         <h1>🎫 PassCard Support</h1>
-        <div class="contact"><h3>📧 Contact Us</h3><a href="mailto:needsomevibe@gmail.com">needsomevibe@gmail.com</a><p style="margin-top:10px;opacity:0.9">We typically respond within 24 hours</p></div>
+        <div class="contact"><h3>📧 Contact Us</h3><a href="mailto:miorauz@gmail.com">miorauz@gmail.com</a><p style="margin-top:10px;opacity:0.9">We typically respond within 24 hours</p></div>
         <h2>FAQ</h2>
         <div class="faq"><h3>How do I create a pass?</h3><p>Tap "+" on the main screen, fill in details, and tap "Add to Wallet".</p></div>
         <div class="faq"><h3>Can I edit a pass?</h3><p>Yes! Tap any saved pass and then tap "Edit" to modify it.</p></div>
