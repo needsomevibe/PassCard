@@ -667,10 +667,10 @@ struct ServerSettingsView: View {
                     }
                     
                     Button {
-                        serverURL = "https://unpuffed-galliardly-aaden.ngrok-free.dev"
+                        serverURL = "https://passcard-server.onrender.com"
                         HapticManager.shared.lightImpact()
                     } label: {
-                        Text("Use ngrok URL")
+                        Text("Use Render Server")
                     }
                 } header: {
                     Text("Quick Actions")

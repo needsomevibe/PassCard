@@ -55,8 +55,8 @@ class PassAPIService: PassAPIServiceProtocol, ObservableObject {
         #if targetEnvironment(simulator)
         return UserDefaults.standard.string(forKey: "serverURL") ?? "http://localhost:3000"
         #else
-        // Замените на ваш ngrok URL или реальный сервер
-        return UserDefaults.standard.string(forKey: "serverURL") ?? "https://unpuffed-galliardly-aaden.ngrok-free.dev"
+        // Render server URL (замените на ваш после деплоя)
+        return UserDefaults.standard.string(forKey: "serverURL") ?? "https://passcard-server.onrender.com"
         #endif
     }
     

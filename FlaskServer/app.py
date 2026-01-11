@@ -13,7 +13,7 @@ import threading
 import time
 import urllib.request
 from datetime import datetime
-from flask import Flask, request, jsonify, send_file, Response
+from flask import Flask, request, jsonify, send_file, Response, send_from_directory
 from flask_cors import CORS
 
 from pass_generator import PassGenerator
@@ -80,6 +80,19 @@ def health():
         'timestamp': datetime.now().isoformat(),
         'version': '1.0.0'
     })
+
+
+@app.route('/privacy', methods=['GET'])
+@app.route('/privacy-policy', methods=['GET'])
+def privacy_policy():
+    """Privacy Policy page"""
+    return send_from_directory(TEMPLATES_DIR, 'privacy.html')
+
+
+@app.route('/support', methods=['GET'])
+def support():
+    """Support page"""
+    return send_from_directory(TEMPLATES_DIR, 'support.html')
 
 
 @app.route('/api/passes/create', methods=['POST'])
