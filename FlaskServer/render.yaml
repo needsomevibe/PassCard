@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: passcard-server
+    runtime: python
+    plan: free  # Или starter для $7/мес без засыпания
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: PASS_TYPE_ID
+        value: "pass.com.needsomevibe.passcard"
+      - key: TEAM_ID
+        value: "XFL8CQ52JZ"
+      - key: ORG_NAME
+        value: "PassCard"
+      - key: PASS_KEY_PASSWORD
+        sync: false
+      - key: WEB_SERVICE_URL
+        sync: false
