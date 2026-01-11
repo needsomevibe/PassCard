@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-struct SavedPass: Identifiable, Codable {
+struct SavedPass: Identifiable, Codable, Equatable {
     let id: UUID
     var serialNumber: String
     var eventName: String
@@ -288,24 +288,16 @@ class PassStorageManager: ObservableObject {
         
         if sorted != savedPasses {
             DispatchQueue.main.async { [weak self] in
-                self?.savedPasses = sorted
-                self?.lastSyncDate = Date()
+                guard let self else { return }
+                
+                self.savedPasses = sorted
+                self.lastSyncDate = Date()
                 
                 // Save merged result locally
                 if let data = try? JSONEncoder().encode(sorted) {
-                    UserDefaults.standard.set(data, forKey: self?.localStorageKey ?? "")
+                    UserDefaults.standard.set(data, forKey: self.localStorageKey)
                 }
             }
         }
-    }
-}
-
-// MARK: - SavedPass Equatable
-extension SavedPass: Equatable {
-    static func == (lhs: SavedPass, rhs: SavedPass) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.serialNumber == rhs.serialNumber &&
-        lhs.eventName == rhs.eventName &&
-        lhs.createdAt == rhs.createdAt
     }
 }
