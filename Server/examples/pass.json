@@ -1,0 +1,107 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.com.example.passcard",
+  "teamIdentifier": "XXXXXXXXXX",
+  "serialNumber": "PASS-1704067200000-ABC12345",
+  "organizationName": "Concert Agency",
+  "description": "Концерт группы Example — Юбилейный тур 2024",
+  
+  "backgroundColor": "rgb(30, 30, 46)",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "labelColor": "rgb(166, 173, 200)",
+  
+  "logoText": "CONCERT AGENCY",
+  
+  "barcodes": [
+    {
+      "format": "PKBarcodeFormatQR",
+      "message": "TICKET-2024-001234-ABCDEF",
+      "messageEncoding": "iso-8859-1",
+      "altText": "TICKET-2024-001234"
+    }
+  ],
+  
+  "barcode": {
+    "format": "PKBarcodeFormatQR",
+    "message": "TICKET-2024-001234-ABCDEF",
+    "messageEncoding": "iso-8859-1"
+  },
+  
+  "relevantDate": "2024-12-31T19:00:00+03:00",
+  
+  "locations": [
+    {
+      "latitude": 55.820842,
+      "longitude": 37.384932,
+      "relevantText": "Крокус Сити Холл рядом"
+    }
+  ],
+  
+  "eventTicket": {
+    "headerFields": [
+      {
+        "key": "time",
+        "label": "ВРЕМЯ",
+        "value": "19:00"
+      }
+    ],
+    "primaryFields": [
+      {
+        "key": "event",
+        "label": "СОБЫТИЕ",
+        "value": "Концерт группы Example"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "venue",
+        "label": "МЕСТО",
+        "value": "Крокус Сити Холл"
+      },
+      {
+        "key": "date",
+        "label": "ДАТА",
+        "value": "31 декабря 2024"
+      }
+    ],
+    "auxiliaryFields": [
+      {
+        "key": "seat",
+        "label": "МЕСТО",
+        "value": "Сектор A, Ряд 5, Место 12"
+      },
+      {
+        "key": "category",
+        "label": "КАТЕГОРИЯ",
+        "value": "VIP"
+      }
+    ],
+    "backFields": [
+      {
+        "key": "organization",
+        "label": "Организатор",
+        "value": "Concert Agency Ltd."
+      },
+      {
+        "key": "address",
+        "label": "Адрес",
+        "value": "Москва, МКАД 65-66 км, Крокус Сити Холл"
+      },
+      {
+        "key": "description",
+        "label": "О мероприятии",
+        "value": "Юбилейный концерт группы Example в рамках мирового тура 2024. Начало в 19:00, двери открываются в 18:00."
+      },
+      {
+        "key": "terms",
+        "label": "Условия",
+        "value": "Билет действителен только с документом, удостоверяющим личность. Возврат билетов осуществляется согласно законодательству РФ."
+      },
+      {
+        "key": "support",
+        "label": "Поддержка",
+        "value": "support@example.com\n+7 (495) 123-45-67"
+      }
+    ]
+  }
+}
