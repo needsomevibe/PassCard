@@ -10,6 +10,7 @@ import SwiftUI
 struct CreatePassView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var storageManager: PassStorageManager
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     @State private var ticket = PassTicket()
     @State private var currentStep = 0
@@ -26,7 +27,7 @@ struct CreatePassView: View {
     private let totalSteps = 3
     
     private var isPremium: Bool {
-        UserDefaults.standard.bool(forKey: "isPremium")
+        subscriptionManager.isPremium || UserDefaults.standard.bool(forKey: "isPremium")
     }
     
     var body: some View {

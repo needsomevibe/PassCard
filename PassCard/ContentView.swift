@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var storageManager = PassStorageManager()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var showingCreatePass = false
     @State private var showingSettings = false
     @State private var showingPaywall = false
@@ -78,7 +79,7 @@ struct ContentView: View {
     }
     
     private var isPremium: Bool {
-        UserDefaults.standard.bool(forKey: "isPremium")
+        subscriptionManager.isPremium || UserDefaults.standard.bool(forKey: "isPremium")
     }
     
     private func handleCreatePass() {

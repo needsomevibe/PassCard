@@ -10,11 +10,11 @@ import StoreKit
 
 struct PaywallView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var selectedPlan: SubscriptionPlan = .yearly
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @State private var selectedPlan: SubscriptionProductID = .yearly
     @State private var isAnimating = false
     @State private var isPurchasing = false
     @State private var showFeatures = false
-    @State private var products: [Product] = []
     @State private var purchaseError: String?
     @State private var showingError = false
     
@@ -154,16 +154,41 @@ struct PaywallView: View {
                     
                     // Plans
                     VStack(spacing: 12) {
-                        ForEach(SubscriptionPlan.allCases) { plan in
-                            PlanCard(
-                                plan: plan,
-                                isSelected: selectedPlan == plan
+                        // Yearly Plan
+                        if let yearlyProduct = subscriptionManager.yearlyProduct {
+                            ProductPlanCard(
+                                product: yearlyProduct,
+                                isSelected: selectedPlan == .yearly,
+                                isPopular: true,
+                                savings: calculateSavings()
                             ) {
                                 HapticManager.shared.selection()
                                 withAnimation(.spring(response: 0.3)) {
-                                    selectedPlan = plan
+                                    selectedPlan = .yearly
                                 }
                             }
+                        }
+                        
+                        // Weekly Plan
+                        if let weeklyProduct = subscriptionManager.weeklyProduct {
+                            ProductPlanCard(
+                                product: weeklyProduct,
+                                isSelected: selectedPlan == .weekly,
+                                isPopular: false,
+                                savings: nil
+                            ) {
+                                HapticManager.shared.selection()
+                                withAnimation(.spring(response: 0.3)) {
+                                    selectedPlan = .weekly
+                                }
+                            }
+                        }
+                        
+                        // Fallback if products not loaded
+                        if subscriptionManager.products.isEmpty && !subscriptionManager.isLoading {
+                            Text("Loading plans...")
+                                .foregroundStyle(.white.opacity(0.6))
+                                .padding()
                         }
                     }
                     .padding(.horizontal)
@@ -189,13 +214,21 @@ struct PaywallView: View {
                                 ProgressView()
                                     .tint(.white)
                             } else {
-                                Text("Continue")
-                                    .font(.headline)
-                                    .foregroundStyle(.white)
+                                HStack {
+                                    Text("Continue")
+                                        .font(.headline)
+                                    
+                                    if let product = selectedProduct {
+                                        Text("— \(product.displayPrice)/\(selectedPlan == .yearly ? "year" : "week")")
+                                            .font(.subheadline)
+                                            .opacity(0.9)
+                                    }
+                                }
+                                .foregroundStyle(.white)
                             }
                         }
                     }
-                    .disabled(isPurchasing)
+                    .disabled(isPurchasing || selectedProduct == nil)
                     .padding(.horizontal)
                     .scaleEffect(isAnimating ? 1 : 0.9)
                     .opacity(isAnimating ? 1 : 0)
@@ -213,13 +246,13 @@ struct PaywallView: View {
                     
                     // Terms
                     VStack(spacing: 8) {
-                        Text("Cancel anytime")
+                        Text("Cancel anytime • Auto-renews until cancelled")
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.5))
                         
                         HStack(spacing: 16) {
-                            Button("Terms of Use") { }
-                            Button("Privacy Policy") { }
+                            Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                            Link("Privacy Policy", destination: URL(string: "https://passcard-1.onrender.com/privacy")!)
                         }
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.4))
@@ -228,10 +261,10 @@ struct PaywallView: View {
                 }
             }
         }
-        .alert("error", isPresented: $showingError) {
-            Button("ok") { }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK") { }
         } message: {
-            Text(purchaseError ?? "")
+            Text(purchaseError ?? "An error occurred")
         }
         .onAppear {
             withAnimation(.easeOut(duration: 0.8)) {
@@ -240,84 +273,63 @@ struct PaywallView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 showFeatures = true
             }
-            loadProducts()
-        }
-    }
-    
-    private func loadProducts() {
-        Task {
-            do {
-                // Replace with your actual product IDs from App Store Connect
-                let productIDs = [
-                    "com.needsomevibe.PassCard.weekly",
-                    "com.needsomevibe.PassCard.yearly"
-                ]
-                
-                products = try await Product.products(for: productIDs)
-            } catch {
-                print("Failed to load products: \(error)")
+            
+            // Reload products if needed
+            if subscriptionManager.products.isEmpty {
+                Task {
+                    await subscriptionManager.loadProducts()
+                }
             }
         }
     }
     
+    // MARK: - Computed Properties
+    
+    private var selectedProduct: Product? {
+        switch selectedPlan {
+        case .weekly:
+            return subscriptionManager.weeklyProduct
+        case .yearly:
+            return subscriptionManager.yearlyProduct
+        }
+    }
+    
+    private func calculateSavings() -> String? {
+        guard let weekly = subscriptionManager.weeklyProduct,
+              let yearly = subscriptionManager.yearlyProduct else {
+            return "Save 90%"
+        }
+        
+        let weeklyYearCost = weekly.price * 52
+        let yearlyCost = yearly.price
+        
+        if weeklyYearCost > yearlyCost {
+            let savings = Int((1 - (yearlyCost / weeklyYearCost)) * 100)
+            return "Save \(savings)%"
+        }
+        
+        return nil
+    }
+    
+    // MARK: - Purchase
+    
     private func purchase() {
+        guard let product = selectedProduct else {
+            purchaseError = "Please select a plan"
+            showingError = true
+            return
+        }
+        
         isPurchasing = true
-        HapticManager.shared.mediumImpact()
         
         Task {
             do {
-                // Find the selected product
-                let productID = selectedPlan == .yearly ? 
-                    "com.needsomevibe.PassCard.yearly" : 
-                    "com.needsomevibe.PassCard.weekly"
+                let success = try await subscriptionManager.purchase(product)
                 
-                guard let product = products.first(where: { $0.id == productID }) else {
-                    // Fallback: simulate purchase for testing
-                    await simulatePurchase()
-                    return
-                }
-                
-                let result = try await product.purchase()
-                
-                switch result {
-                case .success(let verification):
-                    // Verify the transaction
-                    switch verification {
-                    case .verified(let transaction):
-                        // Grant access
-                        await MainActor.run {
-                            UserDefaults.standard.set(true, forKey: "isPremium")
-                            HapticManager.shared.success()
-                            isPurchasing = false
-                            dismiss()
-                        }
-                        
-                        // Finish the transaction
-                        await transaction.finish()
-                        
-                    case .unverified:
-                        await MainActor.run {
-                            purchaseError = "Purchase verification failed"
-                            showingError = true
-                            isPurchasing = false
-                        }
-                    }
-                    
-                case .userCancelled:
-                    await MainActor.run {
-                        isPurchasing = false
-                    }
-                    
-                case .pending:
-                    await MainActor.run {
-                        purchaseError = "Purchase is pending approval"
-                        showingError = true
-                        isPurchasing = false
-                    }
-                    
-                @unknown default:
-                    await MainActor.run {
-                        isPurchasing = false
+                await MainActor.run {
+                    isPurchasing = false
+                    if success {
+                        dismiss()
                     }
                 }
             } catch {
@@ -330,51 +342,26 @@ struct PaywallView: View {
         }
     }
     
-    private func simulatePurchase() async {
-        // Fallback simulation for testing without StoreKit configuration
-        try? await Task.sleep(nanoseconds: 2_000_000_000)
-        
-        await MainActor.run {
-            isPurchasing = false
-            HapticManager.shared.success()
-            UserDefaults.standard.set(true, forKey: "isPremium")
-            dismiss()
-        }
-    }
+    // MARK: - Restore
     
     private func restorePurchases() {
         isPurchasing = true
-        HapticManager.shared.lightImpact()
         
         Task {
             do {
-                try await AppStore.sync()
+                try await subscriptionManager.restorePurchases()
                 
-                // Check for active subscriptions
-                for await result in Transaction.currentEntitlements {
-                    switch result {
-                    case .verified(let transaction):
-                        // User has active subscription
-                        await MainActor.run {
-                            UserDefaults.standard.set(true, forKey: "isPremium")
-                            HapticManager.shared.success()
-                            isPurchasing = false
-                            dismiss()
-                        }
-                        return
-                        
-                    case .unverified:
-                        continue
+                await MainActor.run {
+                    isPurchasing = false
+                    
+                    if subscriptionManager.isPremium {
+                        HapticManager.shared.success()
+                        dismiss()
+                    } else {
+                        purchaseError = "No active subscriptions found"
+                        showingError = true
                     }
                 }
-                
-                // No active subscriptions found
-                await MainActor.run {
-                    purchaseError = "No active subscriptions found"
-                    showingError = true
-                    isPurchasing = false
-                }
-                
             } catch {
                 await MainActor.run {
                     purchaseError = error.localizedDescription
@@ -459,43 +446,12 @@ struct FeatureRow: View {
     }
 }
 
-// MARK: - Subscription Plan
-enum SubscriptionPlan: String, CaseIterable, Identifiable {
-    case weekly = "Weekly"
-    case yearly = "Yearly"
-    
-    var id: String { rawValue }
-    
-    var price: String {
-        switch self {
-        case .weekly: return "$1.99"
-        case .yearly: return "$9.99"
-        }
-    }
-    
-    var period: String {
-        switch self {
-        case .weekly: return "per week"
-        case .yearly: return "per year"
-        }
-    }
-    
-    var savings: String? {
-        switch self {
-        case .weekly: return nil
-        case .yearly: return "Save 90%"
-        }
-    }
-    
-    var isPopular: Bool {
-        self == .yearly
-    }
-}
-
-// MARK: - Plan Card
-struct PlanCard: View {
-    let plan: SubscriptionPlan
+// MARK: - Product Plan Card
+struct ProductPlanCard: View {
+    let product: Product
     let isSelected: Bool
+    let isPopular: Bool
+    let savings: String?
     let action: () -> Void
     
     var body: some View {
@@ -503,11 +459,11 @@ struct PlanCard: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(plan.rawValue)
+                        Text(product.displayName)
                             .font(.headline)
                             .foregroundStyle(.white)
                         
-                        if plan.isPopular {
+                        if isPopular {
                             Text("BEST VALUE")
                                 .font(.system(size: 9, weight: .bold))
                                 .foregroundStyle(.white)
@@ -524,7 +480,7 @@ struct PlanCard: View {
                         }
                     }
                     
-                    if let savings = plan.savings {
+                    if let savings = savings {
                         Text(savings)
                             .font(.caption)
                             .foregroundStyle(.green)
@@ -534,12 +490,12 @@ struct PlanCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(plan.price)
+                    Text(product.displayPrice)
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
                     
-                    Text(plan.period)
+                    Text(periodText)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.6))
                 }
@@ -573,6 +529,14 @@ struct PlanCard: View {
             )
         }
         .buttonStyle(.plain)
+    }
+    
+    private var periodText: String {
+        if product.id == SubscriptionProductID.yearly.rawValue {
+            return "per year"
+        } else {
+            return "per week"
+        }
     }
 }
 

@@ -13,6 +13,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.requestReview) var requestReview
     @ObservedObject var storageManager: PassStorageManager
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     @State private var showingPaywall = false
     @State private var showingClearConfirmation = false
@@ -25,7 +26,7 @@ struct SettingsView: View {
     @AppStorage("iCloudSyncEnabled") private var iCloudSyncEnabled = true
     
     private var isPremium: Bool {
-        UserDefaults.standard.bool(forKey: "isPremium")
+        subscriptionManager.isPremium || UserDefaults.standard.bool(forKey: "isPremium")
     }
     
     var body: some View {
