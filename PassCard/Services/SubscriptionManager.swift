@@ -7,6 +7,7 @@
 
 import Foundation
 import StoreKit
+import Combine
 
 // MARK: - Product IDs
 enum SubscriptionProductID: String, CaseIterable {

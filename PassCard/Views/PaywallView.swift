@@ -300,11 +300,12 @@ struct PaywallView: View {
             return "Save 90%"
         }
         
-        let weeklyYearCost = weekly.price * 52
+        let weeklyYearCost = weekly.price * Decimal(52)
         let yearlyCost = yearly.price
         
         if weeklyYearCost > yearlyCost {
-            let savings = Int((1 - (yearlyCost / weeklyYearCost)) * 100)
+            let savingsDecimal = (1 - (yearlyCost / weeklyYearCost)) * 100
+            let savings = NSDecimalNumber(decimal: savingsDecimal).intValue
             return "Save \(savings)%"
         }
         
